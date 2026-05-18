@@ -1,297 +1,370 @@
 import 'package:flutter/material.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 import 'package:provider/provider.dart';
-import '../providers/user_provider.dart';
-import '../utils/app_theme.dart';
-import 'menu_screen.dart';
-import 'profile_screen.dart';
+import '../app_state.dart';
+import '../constants/colors.dart';
 
-class HomeScreen extends StatelessWidget {
+class _Service {
+  final String id;
+  final String label;
+  final IconData icon;
+  const _Service(this.id, this.label, this.icon);
+}
+
+final _mainServices = [
+  _Service('send',      'Send Money',      MdiIcons.send),
+  _Service('recharge',  'Mobile Recharge', MdiIcons.cellphone),
+  _Service('cashout',   'Cash Out',        MdiIcons.cash),
+  _Service('payment',   'Make Payment',    MdiIcons.shoppingOutline),
+  _Service('addmoney',  'Add Money',       MdiIcons.plusCircleOutline),
+  _Service('paybill',   'Pay Bill',        MdiIcons.fileDocumentOutline),
+  _Service('savings',   'Savings',         MdiIcons.piggyBankOutline),
+  _Service('loan',      'Loan',            MdiIcons.bankOutline),
+];
+
+final _moreServices = [
+  _Service('insurance',    'Insurance',     MdiIcons.shieldCheckOutline),
+  _Service('bkashbank',    'bKash to Bank', MdiIcons.bankTransfer),
+  _Service('education',    'Education Fee', MdiIcons.schoolOutline),
+  _Service('micro',        'Microfinance',  MdiIcons.handCoinOutline),
+  _Service('toll',         'Toll',          MdiIcons.boomGateUpOutline),
+  _Service('requestmoney', 'Request Money', MdiIcons.accountCashOutline),
+  _Service('remittance',   'Remittance',    MdiIcons.earth),
+  _Service('donation',     'Donation',      MdiIcons.handHeartOutline),
+];
+
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final user = context.watch<UserProvider>().user;
+  State<HomeScreen> createState() => _HomeScreenState();
+}
 
-    final List<Map<String, dynamic>> services = [
-      {'icon': Icons.send, 'label': 'Send Money', 'color': Colors.orange},
-      {'icon': Icons.phone_android, 'label': 'Mobile Recharge', 'color': Colors.green},
-      {'icon': Icons.account_balance_wallet, 'label': 'Cash Out', 'color': Colors.teal},
-      {'icon': Icons.payment, 'label': 'Make Payment', 'color': Colors.purple},
-      {'icon': Icons.add_circle_outline, 'label': 'Add Money', 'color': Colors.blue},
-      {'icon': Icons.receipt_long, 'label': 'Pay Bill', 'color': Colors.red},
-      {'icon': Icons.savings, 'label': 'Savings', 'color': Colors.indigo},
-      {'icon': Icons.account_balance, 'label': 'Loan', 'color': Colors.brown},
-      {'icon': Icons.security, 'label': 'Insurance', 'color': Colors.cyan},
-      {'icon': Icons.swap_horiz, 'label': 'bKash to Bank', 'color': Colors.deepOrange},
-      {'icon': Icons.school, 'label': 'Education Fee', 'color': Colors.blueGrey},
-      {'icon': Icons.credit_card, 'label': 'Microfinance', 'color': Colors.pink},
-      {'icon': Icons.toll, 'label': 'Toll', 'color': Colors.lime},
-      {'icon': Icons.request_quote, 'label': 'Request Money', 'color': Colors.amber},
-      {'icon': Icons.send_to_mobile, 'label': 'Remittance', 'color': Colors.lightBlue},
-      {'icon': Icons.volunteer_activism, 'label': 'Donation', 'color': Colors.deepPurple},
-    ];
+class _HomeScreenState extends State<HomeScreen> {
+  bool _showMore = false;
+
+  Widget _buildServiceItem(_Service svc) {
+    return SizedBox(
+      width: MediaQuery.of(context).size.width / 4 - 8,
+      child: Column(
+        children: [
+          Container(
+            width: 52,
+            height: 52,
+            decoration: const BoxDecoration(
+              color: kLightPink,
+              shape: BoxShape.circle,
+            ),
+            child: Icon(svc.icon, color: kPink, size: 26),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            svc.label,
+            style: const TextStyle(fontSize: 11, color: Color(0xFF333333)),
+            textAlign: TextAlign.center,
+            maxLines: 2,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServiceGrid(List<_Service> services) {
+    final rows = <List<_Service>>[];
+    for (var i = 0; i < services.length; i += 4) {
+      rows.add(services.sublist(i, i + 4 > services.length ? services.length : i + 4));
+    }
+    return Column(
+      children: rows.map((row) => Padding(
+        padding: const EdgeInsets.symmetric(vertical: 4),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: row.map(_buildServiceItem).toList(),
+        ),
+      )).toList(),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.watch<AppState>();
+    final user = app.user;
+    final topPad = MediaQuery.of(context).padding.top;
+    final bottomPad = MediaQuery.of(context).padding.bottom;
+
+    final balanceText = app.isBalanceVisible
+        ? '৳ ${user.balance.toStringAsFixed(2)}'
+        : 'Tap for Balance';
 
     return Scaffold(
-      backgroundColor: AppTheme.lightGrey,
+      backgroundColor: kBg,
       body: Column(
         children: [
-          // Pink top bar
+          // ── Header ──
           Container(
-            color: AppTheme.bkashPink,
-            padding: EdgeInsets.only(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 16,
-              right: 16,
-              bottom: 12,
-            ),
+            color: kPink,
+            padding: EdgeInsets.fromLTRB(16, topPad + 8, 16, 14),
             child: Row(
               children: [
-                GestureDetector(
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ProfileScreen()),
-                  ),
-                  child: CircleAvatar(
-                    radius: 20,
-                    backgroundColor: Colors.white,
-                    child: Text(
-                      user.avatarInitials,
-                      style: const TextStyle(
-                        color: AppTheme.bkashPink,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
+                // Avatar + name + balance
+                Expanded(
+                  child: GestureDetector(
+                    onTap: app.toggleBalanceVisibility,
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40, height: 40,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withOpacity(0.3),
+                            border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+                          ),
+                          child: Center(
+                            child: Text(user.initials,
+                                style: const TextStyle(color: kWhite, fontSize: 14, fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(user.name,
+                                  style: const TextStyle(color: kWhite, fontSize: 14, fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 5),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: kWhite,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Container(
+                                      width: 16, height: 16,
+                                      decoration: BoxDecoration(
+                                        color: kPink,
+                                        borderRadius: BorderRadius.circular(3),
+                                      ),
+                                      child: const Center(
+                                        child: Text('৳',
+                                            style: TextStyle(color: kWhite, fontSize: 10, fontWeight: FontWeight.bold)),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 3),
+                                    Text(balanceText,
+                                        style: const TextStyle(color: kPink, fontSize: 11, fontWeight: FontWeight.w500)),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        user.name,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 15,
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.white24,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: const Text(
-                          'Tap for Balance',
-                          style: TextStyle(color: Colors.white, fontSize: 11),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.search, color: Colors.white, size: 26),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.send, color: Colors.white, size: 26),
-                  onPressed: () {},
-                ),
-                IconButton(
-                  icon: const Icon(Icons.menu, color: Colors.white, size: 26),
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const MenuScreen()),
-                  ),
+                // Icons
+                Row(
+                  children: [
+                    _HeaderIconBtn(icon: Icons.search, onTap: () {}),
+                    const SizedBox(width: 10),
+                    _HeaderIconBtn(
+                      icon: MdiIcons.send,
+                      onTap: () => Navigator.pushNamed(context, '/menu'),
+                    ),
+                  ],
                 ),
               ],
             ),
           ),
 
-          // Scrollable content
+          // ── Body ──
           Expanded(
             child: SingleChildScrollView(
+              padding: EdgeInsets.only(bottom: bottomPad + 16),
               child: Column(
                 children: [
-                  const SizedBox(height: 8),
-                  // Services grid
+                  // Services Card
                   Container(
-                    color: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    color: kWhite,
+                    padding: const EdgeInsets.only(top: 12, bottom: 4),
                     child: Column(
                       children: [
-                        _buildServiceRow(context, services.sublist(0, 4)),
-                        const SizedBox(height: 16),
-                        _buildServiceRow(context, services.sublist(4, 8)),
-                        const SizedBox(height: 8),
-                        TextButton(
-                          onPressed: () {},
-                          child: const Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text('See More', style: TextStyle(color: AppTheme.bkashPink)),
-                              Icon(Icons.keyboard_arrow_down, color: AppTheme.bkashPink),
-                            ],
+                        _buildServiceGrid(_mainServices),
+                        if (_showMore) _buildServiceGrid(_moreServices),
+                        const Divider(height: 1, color: Color(0xFFF0F0F0)),
+                        const SizedBox(height: 4),
+                        GestureDetector(
+                          onTap: () => setState(() => _showMore = !_showMore),
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(_showMore ? 'See Less' : 'See More',
+                                    style: const TextStyle(color: kPink, fontSize: 13, fontWeight: FontWeight.w500)),
+                                const SizedBox(width: 4),
+                                Icon(_showMore ? MdiIcons.chevronUp : MdiIcons.chevronDown,
+                                    color: kPink, size: 16),
+                              ],
+                            ),
                           ),
                         ),
-                        _buildServiceRow(context, services.sublist(8, 12)),
-                        const SizedBox(height: 16),
-                        _buildServiceRow(context, services.sublist(12, 16)),
                       ],
                     ),
                   ),
 
-                  const SizedBox(height: 8),
-
-                  // Banner
+                  // NFC Promo
                   Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 12),
-                    height: 130,
+                    margin: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                     decoration: BoxDecoration(
-                      color: AppTheme.bkashPink,
+                      color: kWhite,
                       borderRadius: BorderRadius.circular(12),
+                      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.08), blurRadius: 4, offset: const Offset(0, 1))],
                     ),
-                    child: const Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.nfc, color: Colors.white, size: 40),
-                          Text(
-                            'NFC ক্যাশব্যাক',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('NFC', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: kPink)),
+                              const Text('একটি ট্যাপেই', style: TextStyle(fontSize: 12, color: Color(0xFF555555))),
+                              const Text('৳500', style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: kText)),
+                              const Text('ক্যাশব্যাক', style: TextStyle(fontSize: 12, color: Color(0xFF555555))),
+                              const SizedBox(height: 10),
+                              ElevatedButton(
+                                onPressed: () {},
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: kPink,
+                                  foregroundColor: kWhite,
+                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                                  minimumSize: Size.zero,
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+                                ),
+                                child: const Text('জানুন আরো', style: TextStyle(fontSize: 12)),
+                              ),
+                            ],
                           ),
-                          Text('আজই পান!',
-                              style: TextStyle(color: Colors.white70, fontSize: 13)),
-                        ],
-                      ),
+                        ),
+                        Container(
+                          width: 80, height: 80,
+                          decoration: const BoxDecoration(color: kPink, shape: BoxShape.circle),
+                          child: Icon(MdiIcons.nfc, color: kWhite, size: 40),
+                        ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 16),
-
                   // Quick Features
                   Container(
-                    color: Colors.white,
+                    margin: const EdgeInsets.only(top: 12),
+                    color: kWhite,
                     padding: const EdgeInsets.all(16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text('Quick Features',
-                            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 15)),
+                            style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: kText)),
                         const SizedBox(height: 12),
                         Row(
                           children: [
-                            Expanded(
-                              child: _quickFeatureCard(
-                                  Icons.person, user.avatarInitials, AppTheme.bkashPink),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _quickFeatureCard(
-                                  Icons.credit_card, 'VISA', Colors.blue),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _quickFeatureCard(Icons.lock, 'Locked', Colors.grey),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 12),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: _offerCard(Icons.local_offer, 'My Offers', Colors.orange),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _offerCard(Icons.confirmation_number, 'Coupons', Colors.teal),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: _offerCard(Icons.emoji_events, 'Rewards', Colors.amber),
-                            ),
+                            _QuickCard(icon: MdiIcons.tagMultipleOutline, label: 'My Offers'),
+                            const SizedBox(width: 10),
+                            _QuickCard(icon: MdiIcons.ticketPercentOutline, label: 'Coupons'),
+                            const SizedBox(width: 10),
+                            _QuickCard(icon: MdiIcons.starCircleOutline, label: 'Rewards'),
                           ],
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
                 ],
               ),
+            ),
+          ),
+
+          // ── Bottom Nav ──
+          Container(
+            decoration: const BoxDecoration(
+              color: kWhite,
+              border: Border(top: BorderSide(color: Color(0xFFE8E8E8))),
+            ),
+            padding: EdgeInsets.only(top: 8, bottom: bottomPad > 0 ? bottomPad : 8),
+            child: Row(
+              children: [
+                _BottomBtn(icon: MdiIcons.viewGrid),
+                _BottomBtn(icon: MdiIcons.circleOutline),
+                _BottomBtn(icon: MdiIcons.chevronLeft),
+              ],
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildServiceRow(BuildContext context, List<Map<String, dynamic>> items) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: items.map((item) => _serviceItem(item)).toList(),
-    );
-  }
+class _HeaderIconBtn extends StatelessWidget {
+  final IconData icon;
+  final VoidCallback onTap;
+  const _HeaderIconBtn({required this.icon, required this.onTap});
 
-  Widget _serviceItem(Map<String, dynamic> item) {
-    return SizedBox(
-      width: 78,
-      child: Column(
-        children: [
-          CircleAvatar(
-            radius: 26,
-            backgroundColor: (item['color'] as Color).withOpacity(0.12),
-            child: Icon(item['icon'] as IconData,
-                color: item['color'] as Color, size: 26),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            item['label'] as String,
-            textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 11, color: Colors.black87),
-          ),
-        ],
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 38, height: 38,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: Colors.white.withOpacity(0.25),
+          border: Border.all(color: Colors.white.withOpacity(0.4)),
+        ),
+        child: Icon(icon, color: kWhite, size: 20),
       ),
     );
   }
+}
 
-  Widget _quickFeatureCard(IconData icon, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey.shade200),
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 22),
-          const SizedBox(height: 4),
-          Text(label, style: const TextStyle(fontSize: 11)),
-        ],
+class _QuickCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  const _QuickCard({required this.icon, required this.label});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          border: Border.all(color: const Color(0xFFE8E8E8)),
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, color: kPink, size: 20),
+            const SizedBox(height: 6),
+            Text(label, style: const TextStyle(fontSize: 12, color: Color(0xFF333333))),
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _offerCard(IconData icon, String label, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.08),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 26),
-          const SizedBox(height: 4),
-          Text(label,
-              style: TextStyle(fontSize: 11, color: color, fontWeight: FontWeight.w500)),
-        ],
-      ),
+class _BottomBtn extends StatelessWidget {
+  final IconData icon;
+  const _BottomBtn({required this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Icon(icon, color: const Color(0xFF555555), size: 22),
     );
   }
 }

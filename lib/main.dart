@@ -1,11 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'providers/user_provider.dart';
+import 'app_state.dart';
+import 'screens/app_open_screen.dart';
 import 'screens/splash_screen.dart';
-import 'utils/app_theme.dart';
+import 'screens/home_screen.dart';
+import 'screens/menu_screen.dart';
+import 'screens/profile_screen.dart';
 
 void main() {
-  runApp(const BkashApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AppState(),
+      child: const BkashApp(),
+    ),
+  );
 }
 
 class BkashApp extends StatelessWidget {
@@ -13,14 +21,21 @@ class BkashApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => UserProvider(),
-      child: MaterialApp(
-        title: 'bKash',
-        debugShowCheckedModeBanner: false,
-        theme: AppTheme.theme,
-        home: const SplashScreen(),
+    return MaterialApp(
+      title: 'bKash',
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE2136E)),
+        useMaterial3: true,
       ),
+      initialRoute: '/',
+      routes: {
+        '/':        (_) => const AppOpenScreen(),
+        '/splash':  (_) => const SplashScreen(),
+        '/home':    (_) => const HomeScreen(),
+        '/menu':    (_) => const MenuScreen(),
+        '/profile': (_) => const ProfileScreen(),
+      },
     );
   }
 }
