@@ -7,15 +7,8 @@ This project recreates the core UI design of the bKash mobile application includ
 
 ## 📱 Screenshots
 
-<!-- Add your screenshots here -->
+<img width="1600" height="698" alt="image" src="https://github.com/user-attachments/assets/eec941b0-0bec-4402-9fe3-dce21b2a9c54" />
 
-| Open Screen | Splash Screen |
-|-------------|---------------|
-| ![](screenshots/open_screen.png) | ![](screenshots/splash_screen.png) |
-
-| Home Screen | Menu Screen | Profile Screen |
-|--------------|-------------|----------------|
-| ![](screenshots/home_screen.png) | ![](screenshots/menu_screen.png) | ![](screenshots/profile_screen.png) |
 
 ---
 
@@ -46,29 +39,3 @@ This project recreates the core UI design of the bKash mobile application includ
 
 ---
 
-# 📂 Folder Structure
-
-```bash
-lib/
-│
-├── main.dart
-├── providers/
-│   └── app_provider.dart
-│
-├── models/
-│   └── menu_model.dart
-│
-├── screens/
-│   ├── open_screen.dart
-│   ├── splash_screen.dart
-│   ├── home_screen.dart
-│   ├── menu_screen.dart
-│   └── profile_screen.dart
-│
-├── widgets/
-│   ├── service_item.dart
-│   ├── quick_feature_card.dart
-│   └── profile_tile.dart
-│
-└── utils/
-    └── app_colors.dart
